@@ -1,3 +1,5 @@
 /node_modules
+myconfig.ini
+npm-debug.log
 *.*~
 *.*#

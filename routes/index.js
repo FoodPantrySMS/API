@@ -1,23 +1,29 @@
+const fs = require("fs");
+const ini = require("ini");
 const zipcodes = require("zipcodes");
 const mssql = require("mssql");
 const express = require('express');
 
+const config = ini.parse(fs.readFileSync("./config.ini", "utf-8"))
+
 var gmaps = require('@google/maps').createClient({
-    key: "AIzaSyDaIN93VrX0SgQsBauXbapMSDwiMCSQlyk"
+    key: config.google.GEOCODE_API_KEY
 });
 
 const router = express.Router();
 
-var config = {
-    user: "sms_service",
-    password: "Hackhunger2016!",
-    server: "hackhungerchicago.database.windows.net",
-    database: "fb_ServiceLocation",
+var mssqlConfig = {
+    user: config.database.USER,
+    password: config.database.PASS,
+    server: config.database.SERVER,
+    database: config.database.DB,
 
     options: {
 	encrypt: true
     }
 }
+
+console.log(mssqlConfig);
 
 router.get("/programs", (req, res) => {
     // gets programs from database accoridng to query params
@@ -47,7 +53,7 @@ router.get("/programs", (req, res) => {
 	    WHERE fc.IsActive = 1 AND zcd.Miles <= ${req.query.radius}
 	    ORDER BY zcd.Dist`
 
-	    mssql.connect(config)
+	    mssql.connect(mssqlConfig)
 		.then(() => new mssql.Request().query(query))
 		.then(recordset => res.send({
 		    action_success : true,
